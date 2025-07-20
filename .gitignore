@@ -1,3 +1,4 @@
 # .gitignore
 dist/
 *.xpi
+.DS_Store

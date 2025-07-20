@@ -26,4 +26,6 @@ clean:
 	@echo "$(GREEN)✅ Cleaned successfully!$(RESET)"
 	@echo ""
 
-.PHONY: all build clean
+re: clean build
+
+.PHONY: all build clean re

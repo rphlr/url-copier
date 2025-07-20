@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Extension Settings</title>
+    <link rel="stylesheet" href="options.css">
+</head>
+
+<body>
+    <div class="container">
+        <h1 data-i18n="settingsTitle">Extension Settings</h1>
+
+        <label>
+            <input type="checkbox" id="showNotification" checked>
+            <span data-i18n="notifLabel">Show notification when URL is copied</span>
+        </label>
+
+        <label>
+            <span data-i18n="langLabel">Language:</span>
+            <select id="language">
+                <option value="en">English</option>
+                <option value="fr">Français</option>
+            </select>
+        </label>
+
+        <button id="save" data-i18n="saveButton">Save</button>
+
+        <p id="status"></p>
+
+        <footer>
+            <small>Made with ❤️ by <a href="https://github.com/rphlr" target="_blank">rphlr / MediaSmart</a></small>
+        </footer>
+    </div>
+
+    <script src="options.js"></script>
+    <script src="lang/en.js"></script>
+    <script src="lang/fr.js"></script>
+    <script src="lang/loader.js"></script>
+</body>
+
+</html>

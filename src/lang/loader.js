@@ -1,0 +1,1 @@
+console.log('Simple lang loader - translations available via window.translations_en and window.translations_fr');

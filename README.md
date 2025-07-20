@@ -1,7 +1,7 @@
 # URL Copier – Firefox Extension
 
 <p align="center">
-  <img src="icons/icon.png" alt="Extension Icon" width="128" height="128">
+  <img src="src/icons/icon.png" alt="Extension Icon" width="128" height="128">
 </p>
 
 **A minimalist browser extension to copy the current tab’s URL with Cmd+Shift+C / Ctrl+Shift+C.**  
