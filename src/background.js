@@ -77,29 +77,47 @@ browserAPI.commands.onCommand.addListener((command) => {
 });
 
 // Copy URL function with enhanced error handling
-function copyTabURL(tabId) {
+async function copyTabURL(tabId) {
+  let showNotificationEnabled = true;
+  try {
+    if (browserAPI.storage && browserAPI.storage.sync) {
+      const data = await browserAPI.storage.sync.get(['showNotification']);
+      showNotificationEnabled = data.showNotification !== false;
+    }
+  } catch (error) {
+    console.error('Error loading notification setting:', error);
+  }
+
   const successMessage = getMessage('urlCopied');
   const errorMessage = getMessage('copyError');
   
-  console.log('Copying URL for tab:', tabId);
-  
+  console.log('Copying URL for tab:', tabId, 'Show notifications:', showNotificationEnabled);
+
   browserAPI.tabs.executeScript(tabId, {
     code: `
       (function() {
         navigator.clipboard.writeText(window.location.href)
           .then(() => {
             console.log('URL copied successfully');
-            window.postMessage({ 
-              type: 'SHOW_NOTIFICATION', 
-              message: "${successMessage}" 
-            }, '*');
+            ${showNotificationEnabled ? `
+              window.postMessage({ 
+                type: 'SHOW_NOTIFICATION', 
+                message: "${successMessage}" 
+              }, '*');
+            ` : `
+              console.log('Notifications disabled - not showing success message');
+            `}
           })
           .catch((err) => {
             console.error("Failed to copy URL:", err);
-            window.postMessage({ 
-              type: 'SHOW_NOTIFICATION', 
-              message: "${errorMessage}" 
-            }, '*');
+            ${showNotificationEnabled ? `
+              window.postMessage({ 
+                type: 'SHOW_NOTIFICATION', 
+                message: "${errorMessage}" 
+              }, '*');
+            ` : `
+              console.log('Notifications disabled - not showing error message');
+            `}
           });
       })();
     `

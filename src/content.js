@@ -2,6 +2,7 @@
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 let currentLanguage = 'en';
+let showNotificationEnabled = true; // Nouvelle variable pour gérer les notifications
 
 // Simplified translation function using global variables
 function getMessage(key) {
@@ -14,24 +15,33 @@ function getMessage(key) {
   return messages[key] || key;
 }
 
-// Load language from storage with fallbacks
-async function loadLanguage() {
+// Load settings from storage with fallbacks
+async function loadSettings() {
   try {
     if (browserAPI.storage && browserAPI.storage.sync) {
-      const data = await browserAPI.storage.sync.get(['language']);
+      const data = await browserAPI.storage.sync.get(['language', 'showNotification']);
       currentLanguage = data.language || 'en';
-      console.log('Language loaded in content script:', currentLanguage);
+      showNotificationEnabled = data.showNotification !== false; // Par défaut true
+      console.log('Settings loaded in content script:', { currentLanguage, showNotificationEnabled });
     } else {
       currentLanguage = localStorage.getItem('extension_language') || 'en';
+      showNotificationEnabled = localStorage.getItem('extension_showNotification') !== 'false';
     }
   } catch (error) {
-    console.error('Error loading language in content script:', error);
+    console.error('Error loading settings in content script:', error);
     currentLanguage = 'en';
+    showNotificationEnabled = true;
   }
 }
 
-// Show notification to user with enhanced styling
+// Show notification to user with enhanced styling - ONLY if enabled
 function showNotification(message) {
+    // Vérifier si les notifications sont activées
+    if (!showNotificationEnabled) {
+        console.log('Notifications disabled, not showing:', message);
+        return;
+    }
+
     let existing = document.getElementById('url-copy-notif');
     if (existing) {
         existing.style.animation = 'blink 0.3s';
@@ -110,29 +120,41 @@ document.addEventListener('keydown', async function(event) {
         event.preventDefault();
         event.stopImmediatePropagation();
 
-        // Reload language to ensure current translations
-        await loadLanguage();
+        // Reload settings to ensure current preferences
+        await loadSettings();
 
         try {
             await navigator.clipboard.writeText(window.location.href);
-            showNotification(getMessage('urlCopied'));
+            // Seulement afficher la notification si elle est activée
+            if (showNotificationEnabled) {
+                showNotification(getMessage('urlCopied'));
+            }
             console.log('URL copied via keyboard shortcut');
         } catch (err) {
             console.error("Copy failed:", err);
-            showNotification(getMessage('copyError'));
+            // Seulement afficher la notification d'erreur si elle est activée
+            if (showNotificationEnabled) {
+                showNotification(getMessage('copyError'));
+            }
         }
     }
 }, true);
 
-// Listen for language changes with error handling
+// Listen for storage changes with error handling
 browserAPI.storage.onChanged.addListener((changes, namespace) => {
-    if (namespace === 'sync' && changes.language) {
-        currentLanguage = changes.language.newValue;
-        console.log('Language changed in content script:', currentLanguage);
+    if (namespace === 'sync') {
+        if (changes.language) {
+            currentLanguage = changes.language.newValue;
+            console.log('Language changed in content script:', currentLanguage);
+        }
+        if (changes.showNotification) {
+            showNotificationEnabled = changes.showNotification.newValue;
+            console.log('Notification setting changed in content script:', showNotificationEnabled);
+        }
     }
 });
 
 // Initialize with error handling
-loadLanguage();
+loadSettings();
 
 console.log('Content script loaded');
