@@ -1,197 +1,143 @@
-// Options script - Enhanced error handling and storage fallbacks
+// Options page — language, theme and notification preferences. Everything is
+// stored in `storage.sync`; the background page and content scripts react to
+// the change events, so no manual message passing is required.
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 let currentLanguage = 'en';
+let currentTheme = 'system';
 
-// Simplified translation function using global variables
-function getMessage(key) {
-  const translations = {
-    en: window.translations_en || {},
-    fr: window.translations_fr || {}
-  };
-  
-  const messages = translations[currentLanguage] || translations.en || {};
-  return messages[key] || key;
-}
+const t = (key) => window.urlCopierGetMessage(currentLanguage, key);
 
-// Apply translations to the page
-function applyTranslations(lang = 'en') {
-  currentLanguage = lang;
-  
-  // Page title
-  document.title = getMessage('settingsTitle');
-  
-  // Elements with data-i18n attribute
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    el.textContent = getMessage(key);
+// ---------------------------------------------------------------------------
+// Rendering
+// ---------------------------------------------------------------------------
+function applyTheme(theme) {
+  currentTheme = theme;
+  const root = document.documentElement;
+  const dark =
+    theme === 'dark' ||
+    (theme !== 'light' &&
+      window.matchMedia('(prefers-color-scheme: dark)').matches);
+  root.classList.toggle('dark', dark);
+  root.classList.toggle('light', !dark);
+
+  document.querySelectorAll('.seg-btn').forEach((btn) => {
+    btn.classList.toggle('is-active', btn.dataset.theme === theme);
   });
-  
-  console.log('Translations applied for language:', lang);
 }
 
-// Load settings from storage with robust fallbacks
-async function loadSettings() {
-  try {
-    let data = {};
-    
-    if (browserAPI.storage && browserAPI.storage.sync) {
-      try {
-        data = await browserAPI.storage.sync.get(['language', 'showNotification']);
-        console.log('Settings loaded from storage:', data);
-      } catch (error) {
-        console.warn('Storage failed, using localStorage:', error);
-        data = {
-          language: localStorage.getItem('extension_language') || 'en',
-          showNotification: localStorage.getItem('extension_showNotification') !== 'false'
-        };
-      }
-    } else {
-      data = {
-        language: localStorage.getItem('extension_language') || 'en',
-        showNotification: localStorage.getItem('extension_showNotification') !== 'false'
-      };
-    }
-    
-    const lang = data.language || 'en';
-    const showNotif = data.showNotification !== false;
-    
-    // Apply values to form elements
-    const select = document.getElementById('language');
-    if (select) {
-      select.value = lang;
-    }
-    
-    const checkbox = document.getElementById('showNotification');
-    if (checkbox) {
-      checkbox.checked = showNotif;
-    }
-    
-    // Apply translations
-    applyTranslations(lang);
-    
-  } catch (error) {
-    console.error('Error loading settings:', error);
-    applyTranslations('en');
-  }
+function applyTranslations() {
+  document.documentElement.lang = currentLanguage;
+  document.title = t('settingsTitle');
+  document.querySelectorAll('[data-i18n]').forEach((el) => {
+    el.textContent = t(el.getAttribute('data-i18n'));
+  });
 }
 
-// Save settings to storage
-async function saveSettings() {
-  const languageSelect = document.getElementById('language');
-  const notificationCheckbox = document.getElementById('showNotification');
+function populateLanguages() {
+  const select = document.getElementById('language');
+  if (!select) return;
+  select.innerHTML = '';
+  (window.URL_COPIER_LOCALES || []).forEach(({ code, label, flag }) => {
+    const opt = document.createElement('option');
+    opt.value = code;
+    opt.textContent = `${flag}  ${label}`;
+    select.appendChild(opt);
+  });
+}
+
+function showShortcut() {
+  const el = document.getElementById('shortcutKeys');
+  if (!el) return;
+  const isMac = navigator.platform.toUpperCase().includes('MAC');
+  el.textContent = isMac ? '⌘ + ⇧ + C' : 'Ctrl + Shift + C';
+}
+
+let statusTimer = null;
+function flashSaved() {
   const status = document.getElementById('status');
-  
-  if (!languageSelect || !notificationCheckbox) {
-    console.error('Elements not found');
-    return;
-  }
-  
-  const language = languageSelect.value;
-  const showNotification = notificationCheckbox.checked;
-  
-  console.log('Saving settings:', { language, showNotification });
-  
-  try {
-    // Try Firefox storage first
-    if (browserAPI.storage && browserAPI.storage.sync) {
-      await browserAPI.storage.sync.set({
-        language: language,
-        showNotification: showNotification
-      });
-      console.log('Settings saved to Firefox storage');
-    } else {
-      throw new Error('Storage not available');
-    }
-    
-    // Apply translations
-    applyTranslations(language);
-    
-    // Visual feedback
-    if (status) {
-      status.textContent = getMessage('savedMessage') + ' ✓';
-      status.style.color = 'green';
-      setTimeout(() => {
-        status.textContent = '';
-      }, 2000);
-    }
-    
-  } catch (error) {
-    console.error('Error saving to storage:', error);
-    
-    // Fallback to localStorage
-    try {
-      localStorage.setItem('extension_language', language);
-      localStorage.setItem('extension_showNotification', showNotification.toString());
-      
-      // Notify background script
-      if (browserAPI.runtime && browserAPI.runtime.sendMessage) {
-        browserAPI.runtime.sendMessage({
-          type: 'LANGUAGE_CHANGED',
-          language: language
-        }).catch(err => console.log('Failed to notify background:', err));
-      }
-      
-      applyTranslations(language);
-      
-      if (status) {
-        status.textContent = getMessage('savedMessage') + ' ✓ (local)';
-        status.style.color = 'orange';
-        setTimeout(() => {
-          status.textContent = '';
-        }, 2000);
-      }
-      
-    } catch (localError) {
-      console.error('Complete save failure:', localError);
-      if (status) {
-        status.textContent = 'Erreur lors de la sauvegarde';
-        status.style.color = 'red';
-      }
-    }
-  }
+  if (!status) return;
+  status.textContent = `${t('savedMessage')} ✓`;
+  clearTimeout(statusTimer);
+  statusTimer = setTimeout(() => (status.textContent = ''), 1800);
 }
 
-// Initialize options page
-document.addEventListener('DOMContentLoaded', async () => {
-  console.log('Options page loaded');
-  
-  // Load current settings
-  await loadSettings();
-  
-  // Save button
-  const saveBtn = document.getElementById('save');
-  if (saveBtn) {
-    saveBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      saveSettings();
-    });
+// ---------------------------------------------------------------------------
+// Persistence
+// ---------------------------------------------------------------------------
+async function save(partial) {
+  try {
+    await browserAPI.storage.sync.set(partial);
+  } catch {
+    // Last-resort fallback so preferences still survive a reload.
+    Object.entries(partial).forEach(([k, v]) =>
+      localStorage.setItem(`url_copier_${k}`, String(v))
+    );
   }
-  
-  // Language change handler with immediate save
-  const langSelect = document.getElementById('language');
-  if (langSelect) {
-    langSelect.addEventListener('change', (e) => {
-      const newLang = e.target.value;
-      console.log('Language changed to:', newLang);
-      applyTranslations(newLang);
-      saveSettings();
-    });
-  }
-  
-  // Debug button for testing
-  const testBtn = document.getElementById('test');
-  if (testBtn) {
-    testBtn.addEventListener('click', () => {
-      console.log('=== DEBUG INFO ===');
-      console.log('Current language:', currentLanguage);
-      console.log('window.translations_en:', window.translations_en);
-      console.log('window.translations_fr:', window.translations_fr);
-      console.log('Test getMessage urlCopied:', getMessage('urlCopied'));
-      console.log('Test getMessage contextMenuTitle:', getMessage('contextMenuTitle'));
-      console.log('=================');
-    });
-  }
-});
+  flashSaved();
+}
 
-console.log('Options script loaded');
+async function loadSettings() {
+  let data = {};
+  try {
+    data = await browserAPI.storage.sync.get([
+      'language',
+      'showNotification',
+      'theme'
+    ]);
+  } catch {
+    data = {
+      language: localStorage.getItem('url_copier_language') || 'en',
+      showNotification:
+        localStorage.getItem('url_copier_showNotification') !== 'false',
+      theme: localStorage.getItem('url_copier_theme') || 'system'
+    };
+  }
+
+  currentLanguage = data.language || 'en';
+  const showNotif = data.showNotification !== false;
+  const theme = data.theme || 'system';
+
+  const select = document.getElementById('language');
+  if (select) select.value = currentLanguage;
+  const checkbox = document.getElementById('showNotification');
+  if (checkbox) checkbox.checked = showNotif;
+
+  applyTheme(theme);
+  applyTranslations();
+}
+
+// ---------------------------------------------------------------------------
+// Wiring
+// ---------------------------------------------------------------------------
+document.addEventListener('DOMContentLoaded', async () => {
+  populateLanguages();
+  showShortcut();
+  await loadSettings();
+
+  document.getElementById('language')?.addEventListener('change', (e) => {
+    currentLanguage = e.target.value;
+    applyTranslations();
+    save({ language: currentLanguage });
+  });
+
+  document
+    .getElementById('showNotification')
+    ?.addEventListener('change', (e) =>
+      save({ showNotification: e.target.checked })
+    );
+
+  document.querySelectorAll('.seg-btn').forEach((btn) =>
+    btn.addEventListener('click', () => {
+      applyTheme(btn.dataset.theme);
+      save({ theme: btn.dataset.theme });
+    })
+  );
+
+  // Follow the OS when in "system" mode.
+  window
+    .matchMedia('(prefers-color-scheme: dark)')
+    .addEventListener('change', () => {
+      if (currentTheme === 'system') applyTheme('system');
+    });
+});

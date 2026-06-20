@@ -1,42 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Copier — Settings</title>
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <header class="hero">
+        <div class="hero-logo">
+          <img src="icons/icon-128.png" alt="" width="30" height="30" />
+        </div>
+        <div>
+          <h1 class="gradient-text" data-i18n="settingsTitle">
+            URL Copier — Settings
+          </h1>
+          <p class="hero-sub">github.com/rphlr/url-copier</p>
+        </div>
+      </header>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Extension Settings</title>
-    <link rel="stylesheet" href="options.css">
-</head>
+      <section class="card">
+        <h2 class="card-title" data-i18n="generalSection">General</h2>
 
-<body>
-    <div class="container">
-        <h1 data-i18n="settingsTitle">Extension Settings</h1>
+        <div class="row">
+          <label class="row-label" for="showNotification" data-i18n="notifLabel">
+            Show a notification when a URL is copied
+          </label>
+          <label class="switch">
+            <input type="checkbox" id="showNotification" checked />
+            <span class="switch-track"></span>
+          </label>
+        </div>
 
-        <label>
-            <input type="checkbox" id="showNotification" checked>
-            <span data-i18n="notifLabel">Show notification when URL is copied</span>
-        </label>
+        <div class="row">
+          <span class="row-label" data-i18n="themeLabel">Theme</span>
+          <div class="seg" id="themePill" role="group">
+            <button class="seg-btn" data-theme="light" data-i18n="themeLight">Light</button>
+            <button class="seg-btn" data-theme="dark" data-i18n="themeDark">Dark</button>
+            <button class="seg-btn" data-theme="system" data-i18n="themeSystem">System</button>
+          </div>
+        </div>
 
-        <label>
-            <span data-i18n="langLabel">Language:</span>
-            <select id="language">
-                <option value="en">English</option>
-                <option value="fr">Français</option>
-            </select>
-        </label>
+        <div class="row">
+          <label class="row-label" for="language" data-i18n="langLabel">Language</label>
+          <select id="language" class="select"></select>
+        </div>
+      </section>
 
-        <button id="save" data-i18n="saveButton">Save</button>
+      <section class="card">
+        <h2 class="card-title" data-i18n="shortcutSection">Keyboard shortcut</h2>
+        <p class="shortcut">
+          <span data-i18n="shortcutHint">Copy the current URL with</span>
+          <kbd id="shortcutKeys">Ctrl + Shift + C</kbd>
+        </p>
+      </section>
 
-        <p id="status"></p>
+      <p class="status" id="status" role="status" aria-live="polite"></p>
 
-        <footer>
-            <small>Made with ❤️ by <a href="https://github.com/rphlr" target="_blank">rphlr / MediaSmart</a></small>
-        </footer>
-    </div>
+      <footer class="foot">
+        <small>
+          Made with ❤️ by
+          <a href="https://github.com/rphlr" target="_blank" rel="noopener">
+            rphlr / MediaSmart
+          </a>
+        </small>
+      </footer>
+    </main>
 
+    <script src="lang/translations.js"></script>
     <script src="options.js"></script>
-    <script src="lang/en.js"></script>
-    <script src="lang/fr.js"></script>
-    <script src="lang/loader.js"></script>
-</body>
-
+  </body>
 </html>

@@ -35,13 +35,15 @@ Stop triggering DevTools by accident. Lightweight, privacy-friendly, and blazing
 ## 🔧 Features
 
 - ⌨️ Copy current tab URL via `Cmd+Shift+C` / `Ctrl+Shift+C`
-- 🖱️ Right-click context menu with "Copy URL" option
-- 🌍 Multilingual support (English & French) with real-time switching
+- 🧩 **Three copy formats**: raw URL, Markdown link `[title](url)`, or `title + URL`
+- 🪟 **Toolbar popup** with one-click buttons for each format
+- 🖱️ Right-click context menu with a format sub-menu
+- 🌍 **5 languages** (EN, FR, ES, DE, IT) with real-time switching
+- 🎨 **Light / Dark / System theme**, brand-styled glass UI
 - 🛑 Prevents DevTools from opening with this shortcut
-- 🔔 In-page visual feedback (non-intrusive notifications)
-- ⚙️ Configurable settings page for notifications and language
-- 🔒 Privacy-first: no tracking, no data collection
-- 💾 Robust storage with localStorage fallback
+- 🔔 Non-intrusive, theme-aware in-page notification
+- 🔒 Privacy-first: no tracking, **no data collection** (declared in the manifest)
+- 💾 Robust storage with `localStorage` fallback
 - ✅ Works on all websites
 
 ---
@@ -87,9 +89,10 @@ Ensure `manifest.json` and all source files are inside the `src/` directory befo
 Access settings via the extension icon or `about:addons` > URL Copier > Preferences.
 
 **Available options:**
-- Toggle notification display when URL is copied
-- Switch between English and French interface
-- Settings are automatically saved and synced
+- Toggle the notification shown when a URL is copied
+- Choose the interface language (EN / FR / ES / DE / IT)
+- Pick a theme (Light / Dark / System)
+- Settings are saved instantly and synced across the browser
 
 ---
 

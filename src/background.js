@@ -1,148 +1,122 @@
-// Background script - Enhanced error handling and storage fallbacks
+// Background script — orchestrates the context menu, the keyboard command and
+// the toolbar, then hands the actual copy off to the content script via a
+// runtime message. No string injection, no spoofable window.postMessage.
 const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 
 let currentLanguage = 'en';
 
-// Simplified translation function using global variables
-function getMessage(key) {
-  const translations = {
-    en: window.translations_en || {},
-    fr: window.translations_fr || {}
-  };
-  
-  const messages = translations[currentLanguage] || translations.en || {};
-  return messages[key] || key;
-}
+const t = (key) => self.urlCopierGetMessage(currentLanguage, key);
 
-// Create context menu with current language
-function createContextMenu() {
-  console.log('Creating context menu with language:', currentLanguage);
-  
-  browserAPI.contextMenus.removeAll(() => {
-    browserAPI.contextMenus.create({
-      id: "copy-url",
-      title: getMessage('contextMenuTitle'),
-      contexts: ["page"]
-    });
-    console.log('Context menu created');
-  });
-}
+// The three copy formats, mirrored in the popup and the content script.
+const FORMATS = ['url', 'markdown', 'title-url'];
 
-// Load language from storage with fallbacks
+// ---------------------------------------------------------------------------
+// Settings
+// ---------------------------------------------------------------------------
 async function loadLanguage() {
   try {
-    if (browserAPI.storage && browserAPI.storage.sync) {
-      const data = await browserAPI.storage.sync.get(['language']);
-      currentLanguage = data.language || 'en';
-      console.log('Language loaded:', currentLanguage);
-    } else {
-      currentLanguage = 'en';
-    }
-  } catch (error) {
-    console.error('Error loading language:', error);
+    const { language } = await browserAPI.storage.sync.get(['language']);
+    currentLanguage = language || 'en';
+  } catch {
     currentLanguage = 'en';
   }
 }
 
-// Initialize extension
-browserAPI.runtime.onInstalled.addListener(async () => {
-  console.log('Extension installed/updated');
-  await loadLanguage();
-  createContextMenu();
-});
-
-browserAPI.runtime.onStartup.addListener(async () => {
-  console.log('Browser started');
-  await loadLanguage();
-  createContextMenu();
-});
-
-// Gestion des clics sur le menu contextuel
-browserAPI.contextMenus.onClicked.addListener((info, tab) => {
-  console.log('Context menu clicked:', info.menuItemId);
-  if (info.menuItemId === "copy-url" && tab && tab.url) {
-    copyTabURL(tab.id);
-  }
-});
-
-browserAPI.commands.onCommand.addListener((command) => {
-  console.log('Command triggered:', command);
-  if (command === "copy-url") {
-    browserAPI.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-      if (tabs[0]) {
-        copyTabURL(tabs[0].id);
-      }
+// ---------------------------------------------------------------------------
+// Context menu — a parent entry with one child per format.
+// ---------------------------------------------------------------------------
+function buildContextMenu() {
+  browserAPI.contextMenus.removeAll(() => {
+    browserAPI.contextMenus.create({
+      id: 'copy-url-parent',
+      title: t('contextMenuTitle'),
+      contexts: ['page', 'frame', 'link', 'selection']
     });
-  }
-});
-
-// Copy URL function with enhanced error handling
-async function copyTabURL(tabId) {
-  let showNotificationEnabled = true;
-  try {
-    if (browserAPI.storage && browserAPI.storage.sync) {
-      const data = await browserAPI.storage.sync.get(['showNotification']);
-      showNotificationEnabled = data.showNotification !== false;
-    }
-  } catch (error) {
-    console.error('Error loading notification setting:', error);
-  }
-
-  const successMessage = getMessage('urlCopied');
-  const errorMessage = getMessage('copyError');
-  
-  console.log('Copying URL for tab:', tabId, 'Show notifications:', showNotificationEnabled);
-
-  browserAPI.tabs.executeScript(tabId, {
-    code: `
-      (function() {
-        navigator.clipboard.writeText(window.location.href)
-          .then(() => {
-            console.log('URL copied successfully');
-            ${showNotificationEnabled ? `
-              window.postMessage({ 
-                type: 'SHOW_NOTIFICATION', 
-                message: "${successMessage}" 
-              }, '*');
-            ` : `
-              console.log('Notifications disabled - not showing success message');
-            `}
-          })
-          .catch((err) => {
-            console.error("Failed to copy URL:", err);
-            ${showNotificationEnabled ? `
-              window.postMessage({ 
-                type: 'SHOW_NOTIFICATION', 
-                message: "${errorMessage}" 
-              }, '*');
-            ` : `
-              console.log('Notifications disabled - not showing error message');
-            `}
-          });
-      })();
-    `
+    browserAPI.contextMenus.create({
+      id: 'copy-url',
+      parentId: 'copy-url-parent',
+      title: t('copyUrl'),
+      contexts: ['page', 'frame', 'link', 'selection']
+    });
+    browserAPI.contextMenus.create({
+      id: 'copy-markdown',
+      parentId: 'copy-url-parent',
+      title: t('copyMarkdown'),
+      contexts: ['page', 'frame', 'link', 'selection']
+    });
+    browserAPI.contextMenus.create({
+      id: 'copy-title-url',
+      parentId: 'copy-url-parent',
+      title: t('copyTitleUrl'),
+      contexts: ['page', 'frame', 'link', 'selection']
+    });
   });
 }
 
-// Listen for language changes
+const MENU_TO_FORMAT = {
+  'copy-url': 'url',
+  'copy-markdown': 'markdown',
+  'copy-title-url': 'title-url'
+};
+
+// ---------------------------------------------------------------------------
+// Copy: ask the active tab's content script to do the clipboard write so the
+// notification can render in-page. Falls back gracefully if no content script
+// is reachable (e.g. about: pages).
+// ---------------------------------------------------------------------------
+function requestCopy(tabId, format) {
+  if (typeof tabId !== 'number') return;
+  browserAPI.tabs
+    .sendMessage(tabId, { type: 'URL_COPIER_COPY', format })
+    .catch(() => {
+      /* No content script on this page — nothing we can do from MV2 here. */
+    });
+}
+
+function copyActiveTab(format) {
+  browserAPI.tabs
+    .query({ active: true, currentWindow: true })
+    .then((tabs) => tabs[0] && requestCopy(tabs[0].id, format));
+}
+
+// ---------------------------------------------------------------------------
+// Wiring
+// ---------------------------------------------------------------------------
+browserAPI.runtime.onInstalled.addListener(async () => {
+  await loadLanguage();
+  buildContextMenu();
+});
+
+browserAPI.runtime.onStartup.addListener(async () => {
+  await loadLanguage();
+  buildContextMenu();
+});
+
+browserAPI.contextMenus.onClicked.addListener((info, tab) => {
+  const format = MENU_TO_FORMAT[info.menuItemId];
+  if (format && tab) requestCopy(tab.id, format);
+});
+
+browserAPI.commands.onCommand.addListener((command) => {
+  if (command === 'copy-url') copyActiveTab('url');
+});
+
+// Rebuild the menu (re-translated) whenever the language changes.
 browserAPI.storage.onChanged.addListener((changes, namespace) => {
-  console.log('Storage changed:', changes);
   if (namespace === 'sync' && changes.language) {
-    currentLanguage = changes.language.newValue;
-    console.log('Language changed to:', currentLanguage);
-    createContextMenu();
+    currentLanguage = changes.language.newValue || 'en';
+    buildContextMenu();
   }
 });
 
-// Listen for messages with error handling
-browserAPI.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log('Message received:', message);
-  if (message.type === 'LANGUAGE_CHANGED') {
-    currentLanguage = message.language;
-    console.log('Language updated via message:', currentLanguage);
-    createContextMenu();
-    sendResponse({ success: true });
+// The popup copies on its own (it has the tab data + a user gesture), but it
+// pings us so the menu language stays in sync if it was just changed.
+browserAPI.runtime.onMessage.addListener((message) => {
+  if (message && message.type === 'URL_COPIER_LANGUAGE') {
+    currentLanguage = message.language || 'en';
+    buildContextMenu();
   }
 });
 
-console.log('Background script loaded');
+// Make sure the menu exists even on a plain background wake-up.
+loadLanguage().then(buildContextMenu);

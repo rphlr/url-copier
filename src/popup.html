@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL Copier</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <div class="pop">
+      <header class="pop-head">
+        <div class="pop-logo">
+          <img src="icons/icon-128.png" alt="" width="22" height="22" />
+        </div>
+        <div class="pop-titles">
+          <h1 class="gradient-text" data-i18n="popupTitle">URL Copier</h1>
+          <p class="pop-hint" data-i18n="popupHint">
+            Pick a format — it lands on your clipboard.
+          </p>
+        </div>
+      </header>
+
+      <div class="pop-url" id="urlPreview" title=""></div>
+
+      <div class="pop-actions">
+        <button class="action" data-format="url">
+          <span class="action-ico">🔗</span>
+          <span class="action-label" data-i18n="copyUrl">Copy URL</span>
+        </button>
+        <button class="action" data-format="markdown">
+          <span class="action-ico">⤷</span>
+          <span class="action-label" data-i18n="copyMarkdown">Copy as Markdown link</span>
+        </button>
+        <button class="action" data-format="title-url">
+          <span class="action-ico">📝</span>
+          <span class="action-label" data-i18n="copyTitleUrl">Copy title + URL</span>
+        </button>
+      </div>
+
+      <footer class="pop-foot">
+        <span class="pop-status" id="status" role="status" aria-live="polite"></span>
+        <button class="pop-settings" id="openSettings" data-i18n="openSettings">
+          Settings
+        </button>
+      </footer>
+    </div>
+
+    <script src="lang/translations.js"></script>
+    <script src="popup.js"></script>
+  </body>
+</html>
