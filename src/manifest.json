@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Copy URL Shortcut",
-  "version": "3.1.0",
+  "version": "3.1.1",
   "description": "Instantly copy the current tab URL (raw, Markdown or title + URL) with Cmd+Shift+C / Ctrl+Shift+C. No more DevTools by accident.",
   "author": "MediaSmart - rphlr",
   "homepage_url": "https://github.com/rphlr/url-copier",
@@ -54,6 +54,7 @@
         "lang/translations.js",
         "url-formats.js",
         "history-store.js",
+        "shortcut.js",
         "content.js"
       ],
       "run_at": "document_end",

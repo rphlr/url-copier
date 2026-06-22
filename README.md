@@ -40,6 +40,7 @@ Stop triggering DevTools by accident. Lightweight, privacy-friendly, and blazing
 - 🧩 **Five copy formats**: raw URL, Markdown link `[title](url)`, `title + URL`, tracking-free URL (strips `utm_*`, `fbclid`…), or domain only
 - 🪟 **Combined popup** — copy buttons, a **QR code** of the page, copy **history** and all settings on one screen
 - 🎯 **Configurable default format** for the keyboard shortcut
+- 🎹 **Rebindable shortcut** — click it in the popup and press any combo
 - 🖱️ Right-click context menu with a format sub-menu
 - 🌍 **5 languages** (EN, FR, ES, DE, IT) with real-time switching and **SVG flags**
 - 🎨 **Light / Dark / System theme** with a draggable pill, brand-styled glass UI

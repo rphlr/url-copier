@@ -9,6 +9,7 @@ let currentLanguage = 'en';
 let showNotificationEnabled = true;
 let theme = 'system'; // 'light' | 'dark' | 'system'
 let defaultFormat = 'url'; // 'url' | 'markdown' | 'title-url'
+let shortcut = self.URLCopierShortcut.defaultShortcut();
 
 const t = (key) => self.urlCopierGetMessage(currentLanguage, key);
 
@@ -21,17 +22,20 @@ async function loadSettings() {
       'language',
       'showNotification',
       'theme',
-      'defaultFormat'
+      'defaultFormat',
+      'shortcut'
     ]);
     currentLanguage = data.language || 'en';
     showNotificationEnabled = data.showNotification !== false;
     theme = data.theme || 'system';
     defaultFormat = data.defaultFormat || 'url';
+    shortcut = data.shortcut || self.URLCopierShortcut.defaultShortcut();
   } catch {
     currentLanguage = 'en';
     showNotificationEnabled = true;
     theme = 'system';
     defaultFormat = 'url';
+    shortcut = self.URLCopierShortcut.defaultShortcut();
   }
 }
 
@@ -43,6 +47,8 @@ browserAPI.storage.onChanged.addListener((changes, namespace) => {
   if (changes.theme) theme = changes.theme.newValue || 'system';
   if (changes.defaultFormat)
     defaultFormat = changes.defaultFormat.newValue || 'url';
+  if (changes.shortcut)
+    shortcut = changes.shortcut.newValue || self.URLCopierShortcut.defaultShortcut();
 });
 
 // ---------------------------------------------------------------------------
@@ -91,9 +97,7 @@ browserAPI.runtime.onMessage.addListener((message) => {
 document.addEventListener(
   'keydown',
   (event) => {
-    const isMac = navigator.platform.toUpperCase().includes('MAC');
-    const modKey = isMac ? event.metaKey : event.ctrlKey;
-    if (modKey && event.shiftKey && event.code === 'KeyC') {
+    if (self.URLCopierShortcut.matches(event, shortcut)) {
       event.preventDefault();
       event.stopImmediatePropagation();
       copy(defaultFormat);

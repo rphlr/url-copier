@@ -8,6 +8,8 @@ let currentTheme = 'system';
 let activeTab = null;
 let themePill = null;
 let formatSelect = null;
+let shortcut = window.URLCopierShortcut.defaultShortcut();
+let recordingShortcut = false;
 
 const t = (key) => window.urlCopierGetMessage(currentLanguage, key);
 
@@ -53,11 +55,37 @@ function applyTranslations() {
   if (themePill) themePill.setTitles(themeTitles());
 }
 
-function showShortcut() {
-  const el = document.getElementById('shortcutKeys');
-  if (!el) return;
-  const isMac = navigator.platform.toUpperCase().includes('MAC');
-  el.textContent = isMac ? '⌘ + ⇧ + C' : 'Ctrl + Shift + C';
+function renderShortcut() {
+  const btn = document.getElementById('shortcutBtn');
+  if (btn) btn.textContent = window.URLCopierShortcut.format(shortcut).join(' + ');
+}
+
+// Click the shortcut button, then press a combo (Ctrl/Cmd + …) to rebind it.
+// Escape cancels. The combo is matched in-page by the content script.
+function recordShortcut() {
+  const btn = document.getElementById('shortcutBtn');
+  if (!btn || recordingShortcut) return;
+  recordingShortcut = true;
+  btn.classList.add('is-recording');
+  btn.textContent = t('pressKeys');
+
+  const onKey = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (e.key === 'Escape') return stop();
+    const combo = window.URLCopierShortcut.fromEvent(e);
+    if (!combo) return; // modifier-only or no Ctrl/Cmd — keep waiting
+    shortcut = combo;
+    save({ shortcut: combo });
+    stop();
+  };
+  const stop = () => {
+    recordingShortcut = false;
+    btn.classList.remove('is-recording');
+    window.removeEventListener('keydown', onKey, true);
+    renderShortcut();
+  };
+  window.addEventListener('keydown', onKey, true);
 }
 
 // Resolve the tab to act on. In the toolbar popup this is the current tab; when
@@ -201,12 +229,14 @@ async function init() {
       'language',
       'theme',
       'showNotification',
-      'defaultFormat'
+      'defaultFormat',
+      'shortcut'
     ]);
     currentLanguage = data.language || 'en';
     theme = data.theme || 'system';
     showNotif = data.showNotification !== false;
     defaultFormat = data.defaultFormat || 'url';
+    if (data.shortcut) shortcut = data.shortcut;
   } catch {
     /* defaults */
   }
@@ -243,7 +273,10 @@ async function init() {
     }
   );
 
-  showShortcut();
+  renderShortcut();
+  document
+    .getElementById('shortcutBtn')
+    .addEventListener('click', recordShortcut);
   applyTranslations();
   document.getElementById('copyright').textContent =
     `© ${new Date().getFullYear()} · URL Copier`;

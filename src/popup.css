@@ -497,6 +497,37 @@ kbd {
   padding: 0.18rem 0.45rem;
 }
 
+.kbd-btn {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 7px;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease, color 0.15s ease;
+}
+
+.kbd-btn:hover {
+  border-color: rgba(181, 20, 253, 0.4);
+  background: var(--surface-hover);
+}
+
+.kbd-btn.is-recording {
+  color: #fff;
+  border-color: transparent;
+  background: var(--brand-gradient);
+  animation: kbd-pulse 1.2s ease-in-out infinite;
+}
+
+@keyframes kbd-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(181, 20, 253, 0.35); }
+  50% { box-shadow: 0 0 0 4px rgba(181, 20, 253, 0); }
+}
+
 /* Page mode — when the same file is opened as the options tab (not the narrow
    toolbar popup): center the card and pin the footer to the bottom. */
 @media (min-width: 480px) {

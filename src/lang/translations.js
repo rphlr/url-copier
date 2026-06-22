@@ -44,6 +44,7 @@
       themeSystem: 'System',
       shortcutSection: 'Keyboard shortcut',
       shortcutHint: 'Copy the current URL with',
+      pressKeys: 'Press keys…',
       saveButton: 'Save',
       savedMessage: 'Settings saved!'
     },
@@ -80,6 +81,7 @@
       themeSystem: 'Système',
       shortcutSection: 'Raccourci clavier',
       shortcutHint: "Copier l'URL courante avec",
+      pressKeys: 'Appuie sur les touches…',
       saveButton: 'Enregistrer',
       savedMessage: 'Paramètres enregistrés !'
     },
@@ -116,6 +118,7 @@
       themeSystem: 'Sistema',
       shortcutSection: 'Atajo de teclado',
       shortcutHint: 'Copiar la URL actual con',
+      pressKeys: 'Pulsa las teclas…',
       saveButton: 'Guardar',
       savedMessage: '¡Ajustes guardados!'
     },
@@ -152,6 +155,7 @@
       themeSystem: 'System',
       shortcutSection: 'Tastenkürzel',
       shortcutHint: 'Aktuelle URL kopieren mit',
+      pressKeys: 'Tasten drücken…',
       saveButton: 'Speichern',
       savedMessage: 'Einstellungen gespeichert!'
     },
@@ -188,6 +192,7 @@
       themeSystem: 'Sistema',
       shortcutSection: 'Scorciatoia da tastiera',
       shortcutHint: "Copia l'URL corrente con",
+      pressKeys: 'Premi i tasti…',
       saveButton: 'Salva',
       savedMessage: 'Impostazioni salvate!'
     }
