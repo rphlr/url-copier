@@ -15,17 +15,21 @@ Stop triggering DevTools by accident. Lightweight, privacy-friendly, and blazing
     <table>
         <tr>
             <td align="center">
-                <img src="screenshots/popup.png" alt="Toolbar popup (light)" width="200">
+                <img src="screenshots/popup.png" alt="Popup (light)" width="320">
                 <br><em>Popup — light</em>
             </td>
             <td align="center">
-                <img src="screenshots/popup-dark.png" alt="Toolbar popup (dark)" width="200">
+                <img src="screenshots/popup-dark.png" alt="Popup (dark)" width="320">
                 <br><em>Popup — dark</em>
             </td>
         </tr>
         <tr>
-            <td align="center" colspan="2">
-                <img src="screenshots/notification.png" alt="In-page copy confirmation" width="360">
+            <td align="center">
+                <img src="screenshots/context-menu.png" alt="Right-click context menu" width="320">
+                <br><em>Right-click menu</em>
+            </td>
+            <td align="center">
+                <img src="screenshots/notification.png" alt="In-page copy confirmation" width="320">
                 <br><em>In-page notification</em>
             </td>
         </tr>
