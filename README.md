@@ -15,16 +15,18 @@ Stop triggering DevTools by accident. Lightweight, privacy-friendly, and blazing
     <table>
         <tr>
             <td align="center">
-                <img src="screenshots/settings-page.png" alt="Extension settings" width="200">
-                <br><em>Extension settings</em>
+                <img src="screenshots/popup.png" alt="Toolbar popup (light)" width="200">
+                <br><em>Popup — light</em>
             </td>
             <td align="center">
-                <img src="screenshots/context-menu.png" alt="Right-click context menu" width="200">
-                <br><em>Right-click context menu</em>
+                <img src="screenshots/popup-dark.png" alt="Toolbar popup (dark)" width="200">
+                <br><em>Popup — dark</em>
             </td>
-            <td align="center">
-                <img src="screenshots/notification.png" alt="Copy confirmation" width="200">
-                <br><em>Copy confirmation</em>
+        </tr>
+        <tr>
+            <td align="center" colspan="2">
+                <img src="screenshots/notification.png" alt="In-page copy confirmation" width="360">
+                <br><em>In-page notification</em>
             </td>
         </tr>
     </table>
@@ -34,16 +36,16 @@ Stop triggering DevTools by accident. Lightweight, privacy-friendly, and blazing
 
 ## 🔧 Features
 
-- ⌨️ Copy current tab URL via `Cmd+Shift+C` / `Ctrl+Shift+C`
-- 🧩 **Three copy formats**: raw URL, Markdown link `[title](url)`, or `title + URL`
-- 🪟 **Toolbar popup** with one-click buttons for each format
+- ⌨️ Copy the current tab URL via `Cmd+Shift+C` / `Ctrl+Shift+C`
+- 🧩 **Five copy formats**: raw URL, Markdown link `[title](url)`, `title + URL`, tracking-free URL (strips `utm_*`, `fbclid`…), or domain only
+- 🪟 **Combined popup** — copy buttons, a **QR code** of the page, copy **history** and all settings on one screen
+- 🎯 **Configurable default format** for the keyboard shortcut
 - 🖱️ Right-click context menu with a format sub-menu
-- 🌍 **5 languages** (EN, FR, ES, DE, IT) with real-time switching
-- 🎨 **Light / Dark / System theme**, brand-styled glass UI
-- 🛑 Prevents DevTools from opening with this shortcut
+- 🌍 **5 languages** (EN, FR, ES, DE, IT) with real-time switching and **SVG flags**
+- 🎨 **Light / Dark / System theme** with a draggable pill, brand-styled glass UI
+- 🛑 Prevents DevTools from opening with the shortcut (on regular web pages)
 - 🔔 Non-intrusive, theme-aware in-page notification
-- 🔒 Privacy-first: no tracking, **no data collection** (declared in the manifest)
-- 💾 Robust storage with `localStorage` fallback
+- 🔒 Privacy-first: no tracking, **no data collection** (declared in the manifest); the QR code is generated locally
 - ✅ Works on all websites
 
 ---

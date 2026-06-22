@@ -1,19 +1,19 @@
 {
   "manifest_version": 2,
   "name": "Copy URL Shortcut",
-  "version": "3.0.0",
+  "version": "3.1.0",
   "description": "Instantly copy the current tab URL (raw, Markdown or title + URL) with Cmd+Shift+C / Ctrl+Shift+C. No more DevTools by accident.",
   "author": "MediaSmart - rphlr",
   "homepage_url": "https://github.com/rphlr/url-copier",
-
   "browser_specific_settings": {
     "gecko": {
       "data_collection_permissions": {
-        "required": ["none"]
+        "required": [
+          "none"
+        ]
       }
     }
   },
-
   "permissions": [
     "tabs",
     "clipboardWrite",
@@ -22,13 +22,11 @@
     "activeTab",
     "<all_urls>"
   ],
-
   "icons": {
     "48": "icons/icon-48.png",
     "96": "icons/icon-96.png",
     "128": "icons/icon-128.png"
   },
-
   "browser_action": {
     "default_icon": {
       "48": "icons/icon-48.png"
@@ -36,31 +34,28 @@
     "default_title": "Copy URL Shortcut",
     "default_popup": "popup.html"
   },
-
   "background": {
-    "scripts": ["lang/translations.js", "background.js"],
+    "scripts": [
+      "lang/translations.js",
+      "background.js"
+    ],
     "persistent": true
   },
-
-  "commands": {
-    "copy-url": {
-      "suggested_key": {
-        "default": "Ctrl+Shift+C",
-        "mac": "Command+Shift+C"
-      },
-      "description": "Copy current tab URL"
-    }
-  },
-
   "options_ui": {
-    "page": "options.html",
+    "page": "popup.html",
     "open_in_tab": true
   },
-
   "content_scripts": [
     {
-      "matches": ["<all_urls>"],
-      "js": ["lang/translations.js", "content.js"],
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "lang/translations.js",
+        "url-formats.js",
+        "history-store.js",
+        "content.js"
+      ],
       "run_at": "document_end",
       "all_frames": false
     }

@@ -1,0 +1,161 @@
+/* Custom language dropdown — shared by popup and options. Relies on host
+   tokens (--surface, --border, --card, --foreground, --muted-foreground,
+   --brand-purple, --surface-hover). Opens upward to avoid clipping at the
+   bottom of the popup. */
+.lang-pill-wrap {
+  position: relative;
+}
+
+.lang-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 32px;
+  padding: 0 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px -6px rgba(20, 23, 45, 0.22);
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.lang-pill:hover {
+  background: var(--surface-hover);
+  box-shadow: 0 6px 16px -6px rgba(181, 20, 253, 0.32);
+}
+
+.lang-flag {
+  display: block;
+  width: 20px;
+  height: 14px;
+  border-radius: 3px;
+  overflow: hidden;
+  flex: 0 0 auto;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+}
+
+.lang-flag svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.lang-chevron {
+  width: 14px;
+  height: 14px;
+  opacity: 0.6;
+  transition: transform 0.2s ease;
+}
+
+.lang-pill-wrap.is-open .lang-chevron {
+  transform: rotate(180deg);
+}
+
+.lang-panel {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  min-width: 190px;
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 16px 48px -12px rgba(20, 23, 45, 0.35);
+  opacity: 0;
+  transform: translateY(8px);
+  pointer-events: none;
+  transition: opacity 0.18s ease, transform 0.18s ease;
+  z-index: 100;
+}
+
+.lang-pill-wrap.is-open .lang-panel {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.lang-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 13.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.lang-item:hover {
+  background: var(--surface-hover);
+}
+
+.lang-item.is-active {
+  background: color-mix(in oklab, var(--brand-purple) 12%, transparent);
+  color: var(--brand-purple);
+}
+
+.lang-item-meta {
+  flex: 1;
+}
+
+.lang-item-name {
+  font-weight: 600;
+}
+
+.lang-item-code {
+  font-size: 11px;
+  opacity: 0.6;
+  letter-spacing: 0.08em;
+  margin-top: 1px;
+}
+
+.lang-item-check {
+  width: 16px;
+  height: 16px;
+  color: var(--brand-purple);
+  flex: 0 0 auto;
+  visibility: hidden;
+}
+
+.lang-item.is-active .lang-item-check {
+  visibility: visible;
+}
+
+/* Icon dropdown (default copy format) — reuses the pill/panel above. */
+.opt-icon-wrap {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.opt-icon {
+  width: 16px;
+  height: 16px;
+  color: var(--muted-foreground);
+}
+
+.lang-item.is-active .opt-icon {
+  color: var(--brand-purple);
+}
+
+.opt-label {
+  font-weight: 600;
+}
+
+.opt-wrap .lang-item-name {
+  flex: 1;
+}

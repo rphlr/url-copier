@@ -15,7 +15,7 @@ const FORMATS = ['url', 'markdown', 'title-url'];
 // ---------------------------------------------------------------------------
 async function loadLanguage() {
   try {
-    const { language } = await browserAPI.storage.sync.get(['language']);
+    const { language } = await browserAPI.storage.local.get(['language']);
     currentLanguage = language || 'en';
   } catch {
     currentLanguage = 'en';
@@ -73,12 +73,6 @@ function requestCopy(tabId, format) {
     });
 }
 
-function copyActiveTab(format) {
-  browserAPI.tabs
-    .query({ active: true, currentWindow: true })
-    .then((tabs) => tabs[0] && requestCopy(tabs[0].id, format));
-}
-
 // ---------------------------------------------------------------------------
 // Wiring
 // ---------------------------------------------------------------------------
@@ -97,13 +91,9 @@ browserAPI.contextMenus.onClicked.addListener((info, tab) => {
   if (format && tab) requestCopy(tab.id, format);
 });
 
-browserAPI.commands.onCommand.addListener((command) => {
-  if (command === 'copy-url') copyActiveTab('url');
-});
-
 // Rebuild the menu (re-translated) whenever the language changes.
 browserAPI.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === 'sync' && changes.language) {
+  if (namespace === 'local' && changes.language) {
     currentLanguage = changes.language.newValue || 'en';
     buildContextMenu();
   }

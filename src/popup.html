@@ -4,6 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>URL Copier</title>
+    <link rel="stylesheet" href="theme-pill.css" />
+    <link rel="stylesheet" href="lang-select.css" />
     <link rel="stylesheet" href="popup.css" />
   </head>
   <body>
@@ -14,14 +16,11 @@
         </div>
         <div class="pop-titles">
           <h1 class="gradient-text" data-i18n="popupTitle">URL Copier</h1>
-          <p class="pop-hint" data-i18n="popupHint">
-            Pick a format — it lands on your clipboard.
-          </p>
+          <p class="pop-url" id="urlPreview" title=""></p>
         </div>
       </header>
 
-      <div class="pop-url" id="urlPreview" title=""></div>
-
+      <!-- Copy actions -->
       <div class="pop-actions">
         <button class="action" data-format="url">
           <span class="action-ico">🔗</span>
@@ -37,15 +36,87 @@
         </button>
       </div>
 
-      <footer class="pop-foot">
-        <span class="pop-status" id="status" role="status" aria-live="polite"></span>
-        <button class="pop-settings" id="openSettings" data-i18n="openSettings">
-          Settings
-        </button>
-      </footer>
+      <div class="chips">
+        <button class="chip" data-format="clean" data-i18n="cleanChip">No tracking</button>
+        <button class="chip" data-format="domain" data-i18n="domainChip">Domain</button>
+      </div>
+
+      <span class="pop-status" id="status" role="status" aria-live="polite"></span>
+
+      <!-- QR code -->
+      <div class="qr-card">
+        <div class="qr-frame" id="qr"></div>
+        <span class="qr-cap" data-i18n="qrCaption">Scan to open on your phone</span>
+      </div>
+
+      <!-- History -->
+      <section class="block">
+        <div class="block-head">
+          <span class="block-title" data-i18n="recentTitle">Recent</span>
+          <button class="pop-link" id="clearHistory" data-i18n="clearHistory">Clear</button>
+        </div>
+        <div id="history" class="history"></div>
+      </section>
+
+      <!-- Settings -->
+      <section class="block">
+        <div class="block-head">
+          <span class="block-title" data-i18n="settingsSection">Settings</span>
+        </div>
+        <div class="set-rows">
+          <div class="set-row">
+            <span class="set-label" data-i18n="notifLabel">
+              Show a notification when a URL is copied
+            </span>
+            <label class="switch">
+              <input type="checkbox" id="setNotif" />
+              <span class="switch-track"></span>
+            </label>
+          </div>
+
+          <div class="set-row">
+            <span class="set-label" data-i18n="themeLabel">Theme</span>
+            <div id="setTheme"></div>
+          </div>
+
+          <div class="set-row">
+            <span class="set-label" data-i18n="defaultFormatLabel">Default copy format</span>
+            <div id="setDefaultFormat"></div>
+          </div>
+
+          <div class="set-row">
+            <span class="set-label" data-i18n="langLabel">Language</span>
+            <div id="setLang"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Keyboard shortcut -->
+      <section class="block">
+        <div class="block-head">
+          <span class="block-title" data-i18n="shortcutSection">Keyboard shortcut</span>
+        </div>
+        <p class="shortcut">
+          <span data-i18n="shortcutHint">Copy the current URL with</span>
+          <kbd id="shortcutKeys">Ctrl + Shift + C</kbd>
+        </p>
+      </section>
     </div>
 
+    <footer class="pop-footer">
+      <span id="copyright"></span> —
+      <a href="https://mediasmart.ch" target="_blank" rel="noopener noreferrer"
+        class="gradient-text">MediaSmart</a>
+    </footer>
+
     <script src="lang/translations.js"></script>
+    <script src="theme-pill.js"></script>
+    <script src="flags.js"></script>
+    <script src="lang-select.js"></script>
+    <script src="format-select.js"></script>
+    <script src="url-formats.js"></script>
+    <script src="history-store.js"></script>
+    <script src="qrcode.js"></script>
     <script src="popup.js"></script>
   </body>
 </html>

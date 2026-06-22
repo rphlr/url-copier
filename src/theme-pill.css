@@ -1,0 +1,75 @@
+/* Draggable theme pill — shared by popup and options. Relies on the host
+   page's design tokens (--surface, --border, --muted-foreground,
+   --foreground, --brand-gradient). */
+.theme-pill {
+  --pill-btn: 26px;
+  --pill-gap: 3px;
+  --pill-padding: 2px;
+
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--pill-gap);
+  padding: var(--pill-padding);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  box-shadow: 0 4px 14px -6px rgba(20, 23, 45, 0.22);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  flex: 0 0 auto;
+}
+
+.theme-pill.is-dragging {
+  cursor: grabbing;
+}
+
+.theme-pill-thumb {
+  position: absolute;
+  top: var(--pill-padding);
+  left: var(--pill-padding);
+  width: var(--pill-btn);
+  height: var(--pill-btn);
+  border-radius: 9999px;
+  background: var(--brand-gradient);
+  box-shadow: 0 8px 18px -4px rgba(181, 20, 253, 0.55);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  transform: translateX(0);
+  z-index: 0;
+  pointer-events: none;
+}
+
+.theme-pill-btn {
+  appearance: none;
+  background: transparent;
+  border: none;
+  width: var(--pill-btn);
+  height: var(--pill-btn);
+  padding: 0;
+  border-radius: 9999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--muted-foreground);
+  position: relative;
+  z-index: 1;
+  transition: color 0.15s ease;
+}
+
+.theme-pill-btn:hover {
+  color: var(--foreground);
+}
+
+.theme-pill-btn.is-active {
+  color: #fff;
+}
+
+.theme-pill-btn svg {
+  width: 13px;
+  height: 13px;
+}

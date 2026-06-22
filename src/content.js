@@ -8,6 +8,7 @@ const browserAPI = typeof browser !== 'undefined' ? browser : chrome;
 let currentLanguage = 'en';
 let showNotificationEnabled = true;
 let theme = 'system'; // 'light' | 'dark' | 'system'
+let defaultFormat = 'url'; // 'url' | 'markdown' | 'title-url'
 
 const t = (key) => self.urlCopierGetMessage(currentLanguage, key);
 
@@ -16,42 +17,44 @@ const t = (key) => self.urlCopierGetMessage(currentLanguage, key);
 // ---------------------------------------------------------------------------
 async function loadSettings() {
   try {
-    const data = await browserAPI.storage.sync.get([
+    const data = await browserAPI.storage.local.get([
       'language',
       'showNotification',
-      'theme'
+      'theme',
+      'defaultFormat'
     ]);
     currentLanguage = data.language || 'en';
     showNotificationEnabled = data.showNotification !== false;
     theme = data.theme || 'system';
+    defaultFormat = data.defaultFormat || 'url';
   } catch {
     currentLanguage = 'en';
     showNotificationEnabled = true;
     theme = 'system';
+    defaultFormat = 'url';
   }
 }
 
 browserAPI.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace !== 'sync') return;
+  if (namespace !== 'local') return;
   if (changes.language) currentLanguage = changes.language.newValue || 'en';
   if (changes.showNotification)
     showNotificationEnabled = changes.showNotification.newValue !== false;
   if (changes.theme) theme = changes.theme.newValue || 'system';
+  if (changes.defaultFormat)
+    defaultFormat = changes.defaultFormat.newValue || 'url';
 });
 
 // ---------------------------------------------------------------------------
 // Copy
 // ---------------------------------------------------------------------------
 function buildPayload(format) {
-  const url = window.location.href;
-  const title = document.title || url;
-  switch (format) {
-    case 'markdown':
-      return `[${title}](${url})`;
-    case 'title-url':
-      return `${title}\n${url}`;
-    default:
-      return url;
+  return self.URLCopierFormats.build(format, window.location.href, document.title);
+}
+
+function recordHistory() {
+  if (self.URLCopierHistory) {
+    self.URLCopierHistory.add(window.location.href, document.title);
   }
 }
 
@@ -59,6 +62,7 @@ async function copy(format) {
   try {
     await navigator.clipboard.writeText(buildPayload(format));
     showNotification(t('copied'));
+    recordHistory();
   } catch {
     // execCommand fallback for the rare page where the async API is blocked.
     try {
@@ -70,6 +74,7 @@ async function copy(format) {
       document.execCommand('copy');
       ta.remove();
       showNotification(t('copied'));
+      recordHistory();
     } catch {
       showNotification(t('copyError'), true);
     }
@@ -79,6 +84,23 @@ async function copy(format) {
 browserAPI.runtime.onMessage.addListener((message) => {
   if (message && message.type === 'URL_COPIER_COPY') copy(message.format);
 });
+
+// The keyboard shortcut is handled here, in the page, so the clipboard write
+// runs inside a genuine user gesture — the most reliable path. (The toolbar
+// command is intentionally absent from the manifest to avoid a double copy.)
+document.addEventListener(
+  'keydown',
+  (event) => {
+    const isMac = navigator.platform.toUpperCase().includes('MAC');
+    const modKey = isMac ? event.metaKey : event.ctrlKey;
+    if (modKey && event.shiftKey && event.code === 'KeyC') {
+      event.preventDefault();
+      event.stopImmediatePropagation();
+      copy(defaultFormat);
+    }
+  },
+  true
+);
 
 // ---------------------------------------------------------------------------
 // Notification — glassy pill in the brand gradient palette, theme-aware.

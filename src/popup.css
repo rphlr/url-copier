@@ -1,5 +1,5 @@
 /* URL Copier — popup, styled on the shared template design system.
-   Brand gradient #b514fd → #5f75f5, glass surfaces, light/dark tokens. */
+   Single combined screen: copy actions, QR code, history and settings. */
 
 :root,
 :root.light {
@@ -12,11 +12,14 @@
   --brand-purple: #b514fd;
   --brand-blue: #5f75f5;
   --brand-gradient: linear-gradient(90deg, #b514fd 1.42%, #5f75f5 97.8%);
+  --input: rgba(20, 23, 45, 0.1);
   --surface: rgba(255, 255, 255, 0.7);
   --surface-hover: #f7f8ff;
   --bg-blob-1: rgba(181, 20, 253, 0.08);
   --bg-blob-2: rgba(95, 117, 245, 0.08);
   --shadow: 0 8px 24px -12px rgba(20, 23, 45, 0.18);
+  --scrollbar: rgba(20, 23, 45, 0.2);
+  --scrollbar-hover: rgba(20, 23, 45, 0.34);
   --radius: 0.875rem;
 }
 
@@ -30,11 +33,14 @@
   --brand-purple: #cb6dff;
   --brand-blue: #8a9bff;
   --brand-gradient: linear-gradient(90deg, #b514fd 1.42%, #5f75f5 97.8%);
+  --input: rgba(255, 255, 255, 0.14);
   --surface: rgba(49, 45, 83, 0.6);
   --surface-hover: rgba(255, 255, 255, 0.06);
   --bg-blob-1: rgba(181, 20, 253, 0.16);
   --bg-blob-2: rgba(95, 117, 245, 0.14);
   --shadow: 0 12px 28px -12px rgba(0, 0, 0, 0.6);
+  --scrollbar: rgba(255, 255, 255, 0.16);
+  --scrollbar-hover: rgba(255, 255, 255, 0.28);
   --radius: 0.875rem;
 }
 
@@ -42,9 +48,18 @@
   box-sizing: border-box;
 }
 
+html {
+  overflow-x: hidden;
+}
+
 body {
   margin: 0;
-  width: 320px;
+  width: 340px;
+  max-height: 600px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar) transparent;
   font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
   color: var(--foreground);
   background:
@@ -54,8 +69,28 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+body::-webkit-scrollbar {
+  width: 8px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background: var(--scrollbar);
+  border-radius: 8px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-hover);
+}
+
 .pop {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
 }
 
 .gradient-text {
@@ -70,15 +105,14 @@ body {
 .pop-head {
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
+  gap: 11px;
 }
 
 .pop-logo {
   display: grid;
   place-items: center;
-  width: 38px;
-  height: 38px;
+  width: 36px;
+  height: 36px;
   border-radius: 11px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -86,36 +120,34 @@ body {
   flex: 0 0 auto;
 }
 
+.pop-titles {
+  min-width: 0;
+}
+
 .pop-titles h1 {
   margin: 0;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 700;
   letter-spacing: -0.01em;
 }
 
-.pop-hint {
-  margin: 2px 0 0;
-  font-size: 11.5px;
-  line-height: 1.35;
-  color: var(--muted-foreground);
-}
-
-/* URL preview ------------------------------------------------------------- */
 .pop-url {
-  font-size: 11.5px;
+  margin: 2px 0 0;
+  font-size: 11px;
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   color: var(--muted-foreground);
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 8px 10px;
-  margin-bottom: 14px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
 }
 
-/* Actions ----------------------------------------------------------------- */
+.pop-sub {
+  margin: 2px 0 0;
+  font-size: 11.5px;
+  color: var(--muted-foreground);
+}
+
+/* Copy actions ------------------------------------------------------------ */
 .pop-actions {
   display: flex;
   flex-direction: column;
@@ -127,7 +159,7 @@ body {
   align-items: center;
   gap: 11px;
   width: 100%;
-  padding: 11px 13px;
+  padding: 10px 12px;
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--card);
@@ -174,22 +206,103 @@ body {
   background: rgba(255, 255, 255, 0.22);
 }
 
-/* Footer ------------------------------------------------------------------ */
-.pop-foot {
+/* Secondary chips --------------------------------------------------------- */
+.chips {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 14px;
-  min-height: 22px;
+  gap: 6px;
 }
 
+.chip {
+  flex: 1;
+  padding: 7px 6px;
+  border: 1px solid var(--border);
+  border-radius: 9999px;
+  background: var(--surface);
+  color: var(--muted-foreground);
+  font: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.15s ease, background 0.15s ease, border-color 0.15s ease;
+}
+
+.chip:hover {
+  color: var(--foreground);
+  border-color: rgba(181, 20, 253, 0.32);
+  background: var(--surface-hover);
+}
+
+.chip.is-copied {
+  color: #fff;
+  border-color: transparent;
+  background: var(--brand-gradient);
+}
+
+/* Status ------------------------------------------------------------------ */
 .pop-status {
+  min-height: 14px;
+  text-align: center;
   font-size: 12px;
   font-weight: 600;
   color: var(--brand-purple);
 }
 
-.pop-settings {
+/* QR code ----------------------------------------------------------------- */
+.qr-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 7px;
+}
+
+.qr-frame {
+  width: 132px;
+  height: 132px;
+  padding: 9px;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+}
+
+.qr-frame svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.qr-cap {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+/* Blocks (history + settings) --------------------------------------------- */
+.block {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px 14px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.block-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted-foreground);
+}
+
+.pop-link {
   border: none;
   background: transparent;
   color: var(--muted-foreground);
@@ -197,12 +310,212 @@ body {
   font-size: 12px;
   font-weight: 600;
   cursor: pointer;
-  padding: 4px 6px;
+  padding: 3px 6px;
   border-radius: 7px;
   transition: color 0.15s ease, background 0.15s ease;
 }
 
-.pop-settings:hover {
+.pop-link:hover {
   color: var(--foreground);
   background: var(--surface-hover);
+}
+
+/* History ----------------------------------------------------------------- */
+.history {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.history-empty {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  padding: 2px 2px 4px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 9px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  background: transparent;
+  color: var(--foreground);
+  font: inherit;
+  font-size: 12.5px;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.history-item:hover {
+  background: var(--surface-hover);
+  border-color: var(--border);
+}
+
+.history-item .h-title {
+  flex: 1;
+  min-width: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 11.5px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.history-item .h-ico {
+  opacity: 0.5;
+  flex: 0 0 auto;
+}
+
+/* Settings rows ----------------------------------------------------------- */
+.set-rows {
+  display: flex;
+  flex-direction: column;
+}
+
+.set-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 0;
+  border-top: 1px solid var(--border);
+}
+
+.set-row:first-child {
+  border-top: none;
+  padding-top: 2px;
+}
+
+.set-label {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.35;
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  flex: 0 0 auto;
+  width: 40px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.switch input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch-track {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: var(--input);
+  transition: background 0.2s ease;
+}
+
+.switch-track::after {
+  content: '';
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.25);
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.switch input:checked + .switch-track {
+  background: var(--brand-gradient);
+}
+
+.switch input:checked + .switch-track::after {
+  transform: translateX(16px);
+}
+
+/* Select */
+.select {
+  appearance: none;
+  font: inherit;
+  font-size: 13px;
+  color: var(--foreground);
+  background: var(--surface);
+  border: 1px solid var(--input);
+  border-radius: 9px;
+  padding: 6px 28px 6px 10px;
+  cursor: pointer;
+  flex: 0 0 auto;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23596a8b' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+}
+
+/* Footer ------------------------------------------------------------------ */
+.pop-footer {
+  padding: 14px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.pop-footer a {
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.pop-footer a:hover {
+  opacity: 0.8;
+}
+
+/* Keyboard shortcut block ------------------------------------------------- */
+.shortcut {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+kbd {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  color: var(--foreground);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 7px;
+  padding: 0.18rem 0.45rem;
+}
+
+/* Page mode — when the same file is opened as the options tab (not the narrow
+   toolbar popup): center the card and pin the footer to the bottom. */
+@media (min-width: 480px) {
+  body {
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 0;
+  }
+
+  .pop {
+    width: 360px;
+  }
+
+  .pop-footer {
+    margin-top: auto;
+  }
 }
