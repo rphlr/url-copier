@@ -15,7 +15,7 @@ build:
 	@echo ""
 	@echo "$(YELLOW)🔧 Building: $(BUILD)$(RESET)"
 	@mkdir -p $(DIST)
-	@cd $(SRC) && zip -qr ../$(BUILD) . -x "icons/icon.png" "**/.DS_Store"
+	@cd $(SRC) && zip -qr ../$(BUILD) . -x "icons/icon.png" "*.DS_Store"
 	@echo "$(GREEN)✅ Build complete!$(RESET)"
 	@echo ""
 
